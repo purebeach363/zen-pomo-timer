@@ -1,0 +1,114 @@
+﻿<Window x:Class="zen_pomo_timer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:zen_pomo_timer"
+        mc:Ignorable="d"
+        Title="Zen-Pomo-Timer" 
+        Height="380" 
+        Width="280"
+        WindowStartupLocation="CenterScreen"
+        Background="#333333"
+        BorderBrush="#121111"
+        BorderThickness="0"
+        Icon="/Assets/Icons/icon.ico"
+        >
+    <Grid>
+        <StackPanel x:Name="StackPanelTimer"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" 
+                    Height="120"
+                    Width="200"
+                    Background="#333333">
+
+            <StackPanel Height="80">
+                <TextBlock x:Name="TextBlockTime" 
+                           Text="25:00" 
+                           HorizontalAlignment="Center" 
+                           Height="60" 
+                           Width="200" 
+                           FontSize="50" 
+                           TextAlignment="Center"
+                           Foreground="White" />
+
+                <TextBlock x:Name="TextBlockCount" 
+                           Text="Session: " 
+                           HorizontalAlignment="Center" 
+                           FontSize="15" 
+                           Foreground="White" 
+                           Height="25"
+                           Width="200"
+                           TextAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Height="40" 
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Width="132"
+                        VerticalAlignment="Center">
+
+                <Button x:Name="btnStartStop" 
+                        Content="Start" 
+                        Width="55" 
+                        Margin="5,5,5,5"
+                        Background="Purple"
+                        Foreground="White" 
+                        Click="btnStartStop_Click"
+                        FontSize="15"
+                        Cursor="Hand"/>
+
+                <Button x:Name="btnSkip" 
+                        Content="Skip" 
+                        Width="55"  
+                        Margin="5,5,5,5"
+                        Background="Purple"
+                        Foreground="White" 
+                        Click="btnSkip_Click" 
+                        FontSize="15"
+                        Cursor="Hand"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" 
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    Width="40" 
+                    Height="120">
+
+            <Button x:Name="btnSettings" 
+                    Height="40" 
+                    Width="40" 
+                    Background="Transparent" 
+                    Content="⚙" 
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    IsTabStop="False" Click="btnSettings_Click"/>
+
+            <Button x:Name="btnRefresh" 
+                    Width="40" 
+                    Height="40" 
+                    Background="Transparent" 
+                    BorderThickness="0" 
+                    Foreground="White" 
+                    Content="⟳" 
+                    FontSize="20" 
+                    Click="btnRefresh_Click"
+                    Cursor="Hand"
+                    IsTabStop="False"/>
+            <Button x:Name="btnStats"
+                    Background="Transparent"
+                    Width="40"
+                    Height="40"
+                    BorderThickness="0"
+                    Foreground="White"
+                    Cursor="Hand"
+                    IsTabStop="False"
+                    Content="📊"
+                    FontSize="15" Click="btnStats_Click"
+                    >
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
