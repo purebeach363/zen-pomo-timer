@@ -4,111 +4,144 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:zen_pomo_timer"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Zen-Pomo-Timer" 
-        Height="380" 
+        Title="Zen-Pomo-Timer"
+        Height="380"
         Width="280"
         WindowStartupLocation="CenterScreen"
-        Background="#333333"
-        BorderBrush="#121111"
         BorderThickness="0"
         Icon="/Assets/Icons/icon.ico"
-        >
-    <Grid>
-        <StackPanel x:Name="StackPanelTimer"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center" 
-                    Height="120"
-                    Width="200"
-                    Background="#333333">
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
-            <StackPanel Height="80">
-                <TextBlock x:Name="TextBlockTime" 
-                           Text="25:00" 
-                           HorizontalAlignment="Center" 
-                           Height="60" 
-                           Width="200" 
-                           FontSize="50" 
-                           TextAlignment="Center"
-                           Foreground="White" />
+    <Border Background="{DynamicResource MaterialDesignPaper}"
+            CornerRadius="20"
+            ClipToBounds="True"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource MaterialDesignDivider}"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-                <TextBlock x:Name="TextBlockCount" 
-                           Text="Session: " 
-                           HorizontalAlignment="Center" 
-                           FontSize="15" 
-                           Foreground="White" 
-                           Height="25"
-                           Width="200"
-                           TextAlignment="Center"/>
-            </StackPanel>
+        <Grid>
+        <Grid.RowDefinitions>
+            <!-- Top bar for utilities -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main Timer Area -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <StackPanel Height="40" 
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        Width="132"
-                        VerticalAlignment="Center">
+        <!-- UTILITY BAR (Top) 
+             By putting these here, we fix the "Scale" issue. They are small (32x32) 
+             and don't distract from the main timer. -->
+        <StackPanel Grid.Row="0" 
+            Orientation="Horizontal" 
+            HorizontalAlignment="Left" 
+            Margin="10,5">
 
-                <Button x:Name="btnStartStop" 
-                        Content="Start" 
-                        Width="55" 
-                        Margin="5,5,5,5"
-                        Background="Purple"
-                        Foreground="White" 
-                        Click="btnStartStop_Click"
-                        FontSize="15"
-                        Cursor="Hand"/>
-
-                <Button x:Name="btnSkip" 
-                        Content="Skip" 
-                        Width="55"  
-                        Margin="5,5,5,5"
-                        Background="Purple"
-                        Foreground="White" 
-                        Click="btnSkip_Click" 
-                        FontSize="15"
-                        Cursor="Hand"/>
-            </StackPanel>
-        </StackPanel>
-
-        <StackPanel Orientation="Vertical" 
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    Width="40" 
-                    Height="120">
-
-            <Button x:Name="btnSettings" 
-                    Height="40" 
-                    Width="40" 
-                    Background="Transparent" 
-                    Content="⚙" 
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    IsTabStop="False" Click="btnSettings_Click"/>
-
-            <Button x:Name="btnRefresh" 
-                    Width="40" 
-                    Height="40" 
-                    Background="Transparent" 
-                    BorderThickness="0" 
-                    Foreground="White" 
-                    Content="⟳" 
-                    FontSize="20" 
-                    Click="btnRefresh_Click"
-                    Cursor="Hand"
-                    IsTabStop="False"/>
             <Button x:Name="btnStats"
-                    Background="Transparent"
-                    Width="40"
-                    Height="40"
-                    BorderThickness="0"
-                    Foreground="White"
-                    Cursor="Hand"
-                    IsTabStop="False"
-                    Content="📊"
-                    FontSize="15" Click="btnStats_Click"
-                    >
+            Width="34" Height="34" Padding="4"
+            Style="{StaticResource MaterialDesignIconButton}"
+            ToolTip="Statistics"
+            Click="btnStats_Click">
+                <materialDesign:PackIcon Kind="ChartBar" Width="20" Height="20"/>
             </Button>
+
+            <Button x:Name="btnRefresh"
+            Width="34" Height="34" Padding="4"
+            Style="{StaticResource MaterialDesignIconButton}"
+            ToolTip="Reset"
+            Click="btnRefresh_Click">
+                <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
+            </Button>
+
+            <Button x:Name="btnSettings"
+            Width="34" Height="34" Padding="4"
+            Style="{StaticResource MaterialDesignIconButton}"
+            ToolTip="Settings"
+            Click="btnSettings_Click">
+                <materialDesign:PackIcon Kind="Cog" Width="20" Height="20"/>
+            </Button>
+            </StackPanel>
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="5, 5">
+                <Button x:Name="btnMinimize"
+                        Width="34"
+                        Height="34"
+                        Padding="4"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Minimize" Click="btnMinimize_Click"
+                        Foreground="Gray">
+                    <materialDesign:PackIcon Kind="WindowMinimize" Width="20" Height="20"/>
+                </Button>
+                <Button x:Name="btnMaximize"
+                        Width="34"
+                        Height="34"
+                        Padding="4"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Maximize" Click="btnMaximize_Click"
+                        Foreground="Gray">
+                    <materialDesign:PackIcon Kind="WindowMaximize" Width="20" Height="20"/>
+                </Button>
+                <Button x:Name="btnClose"
+                        Width="34"
+                        Height="34"
+                        Padding="4"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Close"
+                        Foreground="PaleVioletRed" Click="btnClose_Click">
+                    <materialDesign:PackIcon Kind="WindowClose" Width="20" Height="20"/>
+                </Button>
+
+            </StackPanel>
+
+        <!-- MAIN TIMER PANEL -->
+        <StackPanel x:Name="StackPanelTimer"
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+            <!-- Time Display -->
+            <TextBlock x:Name="TextBlockTime"
+                       Text="50:00"
+                       Style="{StaticResource MaterialDesignHeadline2TextBlock}"
+                       FontWeight="Light"
+                       Foreground="{DynamicResource ForeColor}"
+                       HorizontalAlignment="Center"/>
+
+            <TextBlock x:Name="TextBlockCount"
+                       Text="Session: 1"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       Opacity="0.6"
+                       Margin="0,0,0,30"
+                       Foreground="{DynamicResource ForeColor}"
+                       HorizontalAlignment="Center"/>
+
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btnStartStop"
+                        Content="Start"
+                        Width="90"
+                        Height="45"
+                        materialDesign:ButtonAssist.CornerRadius="12"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Margin="5"
+                        Click="btnStartStop_Click"/>
+
+                <Button x:Name="btnSkip"
+                        Content="Skip"
+                        Width="90"
+                        Height="45"
+                        materialDesign:ButtonAssist.CornerRadius="12"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="5"
+                        Click="btnSkip_Click"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
+</Border>
 </Window>

@@ -3,10 +3,11 @@ using System.Media;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Input;
 using zen_pomo_timer.Views;
 using zen_pomo_timer.Models.Data;
 using zen_pomo_timer.Models;
-using zen_pomo_timer.Views; 
+using zen_pomo_timer.Views;
 
 namespace zen_pomo_timer
 {
@@ -26,6 +27,8 @@ namespace zen_pomo_timer
         private DispatcherTimer timer;
         private TimerMode timerMode;
         private int _autoSaveCounter = 0;
+
+        private bool _isLocked = false;
 
         #endregion
 
@@ -55,6 +58,12 @@ namespace zen_pomo_timer
 
             // Save settings when window closes
             this.Closed += MainWindow_Closed;
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!_isLocked && e.ChangedButton == MouseButton.Left)
+                this.DragMove();
         }
 
         private void LoadAppState()
@@ -271,31 +280,32 @@ namespace zen_pomo_timer
 
         private void ApplyTheme()
         {
-            // Apply primary color to buttons
             var converter = new BrushConverter();
-            var purpleBrush = (Brush)converter.ConvertFromString("Purple");
+            // Retrieve the color from settings
             var primaryBrush = (Brush)converter.ConvertFromString(settings.PrimaryColor);
 
+            // Apply primary color only to elements that need it
             btnStartStop.Background = primaryBrush;
-            btnSkip.Background = primaryBrush;
+            btnSkip.BorderBrush = primaryBrush; // Outlined buttons use BorderBrush for the ring
+            btnSkip.Foreground = primaryBrush;
             btnSettings.Foreground = primaryBrush;
             btnRefresh.Foreground = primaryBrush;
             btnStats.Foreground = primaryBrush;
+            SyncGlobalResourcesToSettings();
+        }
 
-            // Apply background theme
-            if (settings.BackgroundTheme == "Light")
+        private void SyncGlobalResourcesToSettings()
+        {
+            var conv = ColorConverter.ConvertFromString;
+            if (settings.BackgroundTheme == "Dark")
             {
-                this.Background = (Brush)converter.ConvertFromString("#F5F5F5");
-                StackPanelTimer.Background = (Brush)converter.ConvertFromString("#F5F5F5");
-                TextBlockTime.Foreground = (Brush)converter.ConvertFromString("#333333");
-                TextBlockCount.Foreground = (Brush)converter.ConvertFromString("#333333");
+                Application.Current.Resources["ForeColor"] = Brushes.White;
+                Application.Current.Resources["MaterialDesignPaper"] = new SolidColorBrush((Color)conv("#333333"));
             }
             else
             {
-                this.Background = (Brush)converter.ConvertFromString("#333333");
-                StackPanelTimer.Background = (Brush)converter.ConvertFromString("#333333");
-                TextBlockTime.Foreground = Brushes.White;
-                TextBlockCount.Foreground = Brushes.White;
+                Application.Current.Resources["ForeColor"] = new SolidColorBrush((Color)conv("#333333"));
+                Application.Current.Resources["MaterialDesignPaper"] = new SolidColorBrush((Color)conv("#F5F5F5"));
             }
         }
 
@@ -403,6 +413,66 @@ namespace zen_pomo_timer
             {
                 System.Diagnostics.Debug.WriteLine($"DB Error: {ex.Message}");
             }
+        }
+
+        private void btnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void btnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F11)
+            {
+                if (this.WindowState == WindowState.Maximized)
+                {
+                    // Restore to normal size
+                    this.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    // Enter fullscreen/maximized mode
+                    // Note: WindowStyle.None removes the title bar for a "true" fullscreen feel
+                    this.WindowState = WindowState.Maximized;
+                }
+            }
+            if (e.Key == Key.L && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+
+                if (this.Left == 0 && this.Top == 0 && this.Topmost)
+                {
+                    this.Topmost = false;
+                    _isLocked = false;  
+
+                    double screenWidth = SystemParameters.PrimaryScreenWidth;
+                    double screenHeight = SystemParameters.PrimaryScreenHeight;
+
+                    this.Left = (screenWidth / 2) - (this.Width / 2);
+                    this.Top = (screenHeight / 2) - (this.Height / 2);
+                }
+                else
+                {
+                    this.WindowState = WindowState.Normal;
+                    this.Left = 0;
+                    this.Top = 0;
+                    this.Topmost = true;
+                    _isLocked = true;
+                }
+            }
+
         }
     }
 

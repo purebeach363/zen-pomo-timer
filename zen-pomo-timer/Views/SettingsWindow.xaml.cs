@@ -261,28 +261,63 @@ namespace zen_pomo_timer
             if (cmbBackgroundColor.SelectedItem is ComboBoxItem item)
             {
                 string selected = item.Content.ToString();
+                var conv = ColorConverter.ConvertFromString;
 
                 if (selected == "Dark")
                 {
-                    this.Resources["BackgroundColor"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#121111"));
-                    this.Resources["BackgroundColorPanel"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"));
-                    this.Resources["BorderColorPanel"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#333333"));
-                    this.Resources["ForeColor"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("White"));
+                    var darkBg = new SolidColorBrush((Color)conv("#333333"));
+                    UpdateGlobalResource("ForeColor", Brushes.White);
+                    UpdateGlobalResource("MaterialDesignPaper", darkBg); // This fixes the Main Window Border
                 }
                 else if (selected == "Light")
                 {
-                    this.Resources["BackgroundColor"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F5F5"));
-                    this.Resources["BorderColorPanel"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D0D0D0"));
-                    this.Resources["BackgroundColorPanel"] =
-                       new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
-                    this.Resources["ForeColor"] =
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("Black"));
+                    var lightBg = new SolidColorBrush((Color)conv("#F5F5F5"));
+                    UpdateGlobalResource("ForeColor", new SolidColorBrush((Color)conv("#333333")));
+                    UpdateGlobalResource("MaterialDesignPaper", lightBg); // This fixes the Main Window Border
+                }
+            }
+        }
+        private void UpdateGlobalResource(string key, object value)
+        {
+            Application.Current.Resources[key] = value;
+        }
+
+        private void btnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void btnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.DragMove();
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F11)
+            {
+                if (this.WindowState == WindowState.Maximized)
+                {
+                    // Restore to normal size
+                    this.WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    // Enter fullscreen/maximized mode
+                    // Note: WindowStyle.None removes the title bar for a "true" fullscreen feel
+                    this.WindowState = WindowState.Maximized;
                 }
             }
         }

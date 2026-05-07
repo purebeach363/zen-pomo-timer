@@ -1,87 +1,145 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using Microsoft.EntityFrameworkCore;
-using zen_pomo_timer.Models.Data;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using ScottPlot;
+using ScottPlot.TickGenerators;
+using zen_pomo_timer.Models;
 
 namespace zen_pomo_timer.Views
 {
     public partial class StatsWindow : Window
     {
+        private readonly StatsService _service = new();
+
         public StatsWindow()
         {
-            InitializeComponent();
-            LoadStats();
+            InitializeComponent(); // now used for monthly chart
+            LoadData();
         }
 
-        private void LoadStats()
+        private void LoadData()
         {
-            try
+            // Streaks
+            var streaks = _service.GetStreakStatistics();
+            txtCurrentStreak.Text = $"Current Streak: {streaks.CurrentStreak} days";
+            txtBestStreak.Text = $"{streaks.BestStreak} days";
+
+            // All‑time totals
+            var (sessions, hours) = _service.GetAllTimeTotals();
+            txtAllTimeSessions.Text = sessions.ToString();
+            txtAllTimeHours.Text = hours.ToString();
+
+            // Charts
+            RenderToday();
+            RenderWeek();
+            RenderMonthlySummary();
+        }
+
+        private void RenderToday()
+        {
+            var hourlyData = _service.GetHourlyStats(DateTime.Today);
+            double[] values = new double[24];
+            for (int i = 0; i < 24; i++)
+                values[i] = hourlyData.ContainsKey(i) ? hourlyData[i] : 0;
+
+            lblTodayTotal.Text = $"Total: {Math.Round(values.Sum() / 60.0, 1)} hours";
+
+            chartToday.Plot.Clear();
+            chartToday.Plot.Add.Bars(values);
+            chartToday.Plot.Axes.Bottom.TickGenerator = new NumericAutomatic();
+            chartToday.Plot.Title("Minutes Focused by Hour");
+            chartToday.Refresh();
+            chartToday.UserInputProcessor.Disable();
+        }
+
+        private void RenderWeek()
+        {
+            var today = DateTime.Today;
+            var dailyStats = _service.GetWeeklyDailyStats(today);
+
+            // Extract values and labels (ordered from oldest to newest)
+            var dates = dailyStats.Keys.OrderBy(d => d).ToList();
+            double[] values = dates.Select(d => (double)dailyStats[d]).ToArray();
+            double[] positions = dates.Select((_, i) => (double)i).ToArray();
+
+            // Short day names (Mon, Tue ...)
+            string[] labels = dates.Select(d => d.ToString("ddd")).ToArray();
+
+            chartWeek.Plot.Clear();
+            var bars = chartWeek.Plot.Add.Bars(positions, values);
+            chartWeek.Plot.Axes.Bottom.SetTicks(positions, labels);
+            chartWeek.Plot.Axes.Bottom.TickLabelStyle.Rotation = 0; // horizontal
+            chartWeek.Plot.Title("Minutes Focused by Day (Last 7 Days)");
+            chartWeek.Refresh();
+            chartWeek.UserInputProcessor.Disable();
+        }
+
+        private void RenderMonthlySummary()
+        {
+            int year = DateTime.Today.Year;
+            var monthlyStats = _service.GetMonthlyStats(year);
+
+            double[] values = new double[12];
+            for (int m = 1; m <= 12; m++)
+                values[m - 1] = monthlyStats[m] / 60.0; // hours
+
+            string[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+            double[] positions = Enumerable.Range(0, 12).Select(i => (double)i).ToArray();
+
+            chartHeatMap.Plot.Clear();
+            var bars = chartHeatMap.Plot.Add.Bars(positions, values);
+
+            chartHeatMap.Plot.Axes.Bottom.SetTicks(positions, monthLabels);
+            chartHeatMap.Plot.Axes.Bottom.TickLabelStyle.Rotation = 0;
+            // tilted for readability
+            chartHeatMap.Plot.Title("Monthly Focus Hours");
+            chartHeatMap.Plot.YLabel("Hours");
+            chartHeatMap.Refresh();
+            chartHeatMap.UserInputProcessor.Disable();
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.DragMove();
+        }
+
+        private void btnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void btnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Normal;
+            else
+                this.WindowState = WindowState.Maximized;
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F11)
             {
-                using var db = new AppDbContext();
-
-                // Get all sessions
-                var allSessions = db.Stats.OrderByDescending(s => s.TimeStamp).ToList();
-
-                // Total stats
-                int totalPomodoros = allSessions.Count;
-                int totalMinutes = allSessions.Sum(s => s.DurationMinutes);
-                int todayMinutes = allSessions
-                    .Where(s => s.TimeStamp.Date == DateTime.Today)
-                    .Sum(s => s.DurationMinutes);
-
-                // Update summary cards
-                txtTotalPomodoros.Text = totalPomodoros.ToString();
-                txtTotalMinutes.Text = totalMinutes.ToString();
-                txtTodayMinutes.Text = todayMinutes.ToString();
-
-                // Last 7 days stats
-                var last7Days = new List<WeeklyStat>();
-                for (int i = 6; i >= 0; i--)
+                if (this.WindowState == WindowState.Maximized)
                 {
-                    var date = DateTime.Today.AddDays(-i);
-                    var daySessions = allSessions.Where(s => s.TimeStamp.Date == date).ToList();
-                    var dayMinutes = daySessions.Sum(s => s.DurationMinutes);
-
-                    last7Days.Add(new WeeklyStat
-                    {
-                        Date = date.ToString("ddd, MMM dd"),
-                        Pomodoros = daySessions.Count,
-                        Minutes = dayMinutes
-                    });
+                    // Restore to normal size
+                    this.WindowState = WindowState.Normal;
                 }
-                lstWeeklyStats.ItemsSource = last7Days;
-
-                // All sessions history
-                var sessionList = allSessions.Select(s => new SessionHistory
+                else
                 {
-                    Date = s.TimeStamp.ToString("yyyy-MM-dd HH:mm"),
-                    Duration = $"{s.DurationMinutes} min",
-                    PomodoroCount = 1
-                }).ToList();
-
-                lstAllSessions.ItemsSource = sessionList;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error loading stats: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    // Enter fullscreen/maximized mode
+                    // Note: WindowStyle.None removes the title bar for a "true" fullscreen feel
+                    this.WindowState = WindowState.Maximized;
+                }
             }
         }
-    }
-
-    public class WeeklyStat
-    {
-        public string Date { get; set; }
-        public int Pomodoros { get; set; }
-        public int Minutes { get; set; }
-    }
-
-    public class SessionHistory
-    {
-        public string Date { get; set; }
-        public string Duration { get; set; }
-        public int PomodoroCount { get; set; }
     }
 }

@@ -4,74 +4,73 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:zen_pomo_timer"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Settings" 
-        Height="650" 
+        Title="Settings"
+        Height="650"
         Width="400"
         WindowStartupLocation="CenterOwner"
-        BorderBrush="{DynamicResource BackgroundColor}"
-        Background="{DynamicResource BackgroundColor}"
-        Foreground="{DynamicResource ForeColor}"
-        Icon="/Assets/Icons/settings.ico"
-        >
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Icon="/Assets/Icons/settings.ico">
 
     <Window.Resources>
-
+        <!-- Dynamic primary colour – updated by colour picker -->
         <SolidColorBrush x:Key="PrimaryColor" Color="Purple"/>
-        <SolidColorBrush x:Key="BackgroundColor" Color="#F5F5F5"/>
-        <SolidColorBrush x:Key="BorderColorPanel" Color="#D0D0D0"/>
-        <SolidColorBrush x:Key="BackgroundColorPanel" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="ForeColor" Color="Black"/>
 
-        <!-- Style for TabItems -->
+        <!-- Keep ForeColor for text (set globally by background theme) -->
+        <!-- No longer define BackgroundColorPanel / BorderColorPanel -->
+
+        <!-- Modern TabItem style (matches main window’s flat design) -->
         <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="10,8"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
                         <Border Name="Border"
-                            Background="{DynamicResource BackgroundColorPanel}"
-                            BorderBrush="{DynamicResource BorderColorPanel}"
-                            BorderThickness="1"
-                            Margin="0">
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="1,1,1,0"
+                                CornerRadius="8,8,0,0"
+                                Margin="2,0,0,0">
                             <ContentPresenter ContentSource="Header"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          Margin="15,8"
-                                          TextElement.Foreground="{DynamicResource ForeColor}"/>
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              TextElement.Foreground="{DynamicResource ForeColor}"/>
                         </Border>
                         <ControlTemplate.Triggers>
-
-                            <!-- Selected -->
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border"
-                                Property="Background"
-                                Value="{DynamicResource PrimaryColor}"/>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource PrimaryColor}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
                             </Trigger>
-
-                            <!-- Hover ONLY when NOT selected -->
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="IsMouseOver" Value="True"/>
                                     <Condition Property="IsSelected" Value="False"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="Border"
-                                Property="Background"
-                                Value="{DynamicResource BorderColorPanel}"/>
-                                <!-- slightly different hover color -->
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource MaterialDesignDivider}"/>
                             </MultiTrigger>
-
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- TextBox -->
+        <!-- TextBox using Material Design hints and dynamic backgrounds -->
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="{DynamicResource BackgroundColorPanel}"/>
+            <Setter Property="materialDesign:TextFieldAssist.TextBoxViewMargin" Value="0"/>
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderColorPanel}"/>
-            <Setter Property="Padding" Value="5"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
             <Style.Triggers>
                 <Trigger Property="IsFocused" Value="True">
                     <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
@@ -80,225 +79,269 @@
             </Style.Triggers>
         </Style>
 
-        <!-- ComboBox -->
-        <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="#2D2D2D"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#333333"/>
-            <Setter Property="Padding" Value="5"/>
-            <Style.Triggers>
-                <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
-                </Trigger>
-            </Style.Triggers>
+        <!-- ComboBox with similar treatment -->
+        <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="13"/>
         </Style>
 
-        <!-- ComboBoxItem -->
-        <Style TargetType="ComboBoxItem">
+        <!-- CheckBox keeps its Material Design base -->
+        <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+
+        <!-- GroupBox styled to match the main window -->
+        <Style TargetType="GroupBox">
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="0,10,0,10"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource PrimaryColor}"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#3D3D3D"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
 
-        <!-- CheckBox -->
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Style.Triggers>
-                <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
-                </Trigger>
-            </Style.Triggers>
+        <!-- Labels -->
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,5,0,2"/>
         </Style>
-
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        <TabControl Background="{DynamicResource BackgroundColorPanel}"
-                    BorderBrush="{DynamicResource BorderColorPanel}"
-                    Margin="10"
-                    Grid.Row="0">
+    <!-- Main rounded border – identical approach as MainWindow -->
+    <Border Background="{DynamicResource MaterialDesignPaper}"
+            CornerRadius="20"
+            ClipToBounds="True"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource MaterialDesignDivider}"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-            <!-- General Tab -->
-            <TabItem Header="General" 
-                     Background="Transparent"
-                     Foreground="{DynamicResource ForeColor}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,0" Height="475">
-                    <StackPanel Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Top bar -->
+                <RowDefinition Height="*"/>
+                <!-- Settings content -->
+                <RowDefinition Height="Auto"/>
+                <!-- Bottom buttons -->
+            </Grid.RowDefinitions>
 
-                        <GroupBox Header="Timer Duration" 
-                                  Margin="0,0,0,0"
-                                  Foreground="{DynamicResource ForeColor}"
-                                  BorderBrush="{DynamicResource BorderColorPanel}">
-                            <StackPanel Margin="10,10,10,10">
-                                <Label Content="Pomodoro (minutes):" Foreground="{DynamicResource ForeColor}"/>
-                                <TextBox x:Name="txtSessionTime" Margin="0,0,0,10"
-                                         PreviewTextInput="NumberOnly_PreviewTextInput"
-                                         DataObject.Pasting="TextBox_Pasting" TextChanged="txtSessionTime_TextChanged"/>
+            <!-- ========== TOP BAR ========== -->
+            <Grid Grid.Row="0" Margin="10,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                                <Label Content="Short Break (minutes):" Foreground="{DynamicResource ForeColor}"/>
-                                <TextBox x:Name="txtShortBreak" Margin="0,0,0,10"
-                                         PreviewTextInput="NumberOnly_PreviewTextInput"
-                                         DataObject.Pasting="TextBox_Pasting" TextChanged="txtShortBreak_TextChanged"/>
+                <!-- Left: Window title -->
+                <TextBlock Grid.Column="0"
+                           Text="SETTINGS"
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource ForeColor}"
+                           VerticalAlignment="Center"
+                           Opacity="0.8"/>
 
-                                <Label Content="Long Break (minutes):" Foreground="{DynamicResource ForeColor}"/>
-                                <TextBox x:Name="txtLongBreak" Margin="0,0,0,10"
-                                         PreviewTextInput="NumberOnly_PreviewTextInput"
-                                         DataObject.Pasting="TextBox_Pasting" TextChanged="txtLongBreak_TextChanged"/>
-                            </StackPanel>
-                        </GroupBox>
+                <!-- Spacer -->
+                <Rectangle Grid.Column="1"/>
 
-                        <GroupBox Header="Pomodoro Count" 
-                                  Margin="0,0,0,10"
-                                  Foreground="{DynamicResource ForeColor}"
-                                  BorderBrush="{DynamicResource BorderColorPanel}">
-                            <StackPanel Margin="10">
-                                <Label Content="Pomodoros until long break:" Foreground="{DynamicResource ForeColor}"/>
-                                <TextBox x:Name="txtPomodoroBeforeLongBreak"
-                                         PreviewTextInput="NumberOnly_PreviewTextInput"
-                                         DataObject.Pasting="TextBox_Pasting" 
-                                         Foreground="{DynamicResource ForeColor}"
-                                         TextChanged="txtPomodoroBeforeLongBreak_TextChanged"/>
-                            </StackPanel>
-                        </GroupBox>
-
-                        <GroupBox Header="Behavior" 
-                                  Margin="0,0,0,10"
-                                  Foreground="{DynamicResource ForeColor}"
-                                  BorderBrush="{DynamicResource BorderColorPanel}">
-                            <StackPanel Margin="10">
-                                <CheckBox x:Name="chkAutoStartBreaks" Content="Auto-start breaks" Margin="0,0,0,5" Foreground="{DynamicResource ForeColor}"/>
-                                <CheckBox x:Name="chkAutoStartPomodoros" Content="Auto-start pomodoros" Foreground="{DynamicResource ForeColor}"/>
-                            </StackPanel>
-
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- Appearance Tab -->
-            <TabItem Header="Appearance" 
-                     Background="Transparent"
-                     Foreground="{DynamicResource ForeColor}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-
-                        <GroupBox Header="Colors" 
-                                  Margin="0,0,0,10"
-                                  Foreground="{DynamicResource ForeColor}"
-                                  BorderBrush="{DynamicResource BorderColorPanel}">
-                            <StackPanel Margin="10">
-                                <Label Content="Primary Color:" Foreground="{DynamicResource ForeColor}"/>
-                                <ComboBox x:Name="cmbPrimaryColor" Margin="0,0,0,10" SelectionChanged="cmbPrimaryColor_SelectionChanged" Foreground="Black">
-                                    <ComboBoxItem Content="Purple" IsSelected="True" Foreground="Black"/>
-                                    <ComboBoxItem Content="Blue" Foreground="Black"/>
-                                    <ComboBoxItem Content="Green" Foreground="Black"/>
-                                    <ComboBoxItem Content="Red" Foreground="Black"/>
-                                    <ComboBoxItem Content="Orange" Foreground="Black"/>
-                                </ComboBox>
-
-                                <Label Content="Background Color:" Foreground="{DynamicResource ForeColor}"/>
-                                <ComboBox x:Name="cmbBackgroundColor" Foreground="Black" SelectionChanged="cmbBackgroundColor_SelectionChanged">
-                                    <ComboBoxItem Content="Dark" IsSelected="True" Foreground="Black"/>
-                                    <ComboBoxItem Content="Light" Foreground="Black"/>
-                                    <ComboBoxItem Content="System" Foreground="Black"/>
-                                </ComboBox>
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- Sound Tab -->
-            <TabItem Header="Sound" 
-                     Background="Transparent"
-                     Foreground="{DynamicResource ForeColor}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-
-                        <GroupBox Header="Notifications" 
-                                  Margin="0,0,0,10"
-                                  Foreground="{DynamicResource ForeColor}"
-                                  BorderBrush="{DynamicResource BorderColorPanel}">
-                            <StackPanel Margin="10">
-                                <Label Content="Notification Tone" Foreground="{DynamicResource ForeColor}"></Label>
-                                <ComboBox x:Name="cmbNotificationSound" Margin="0,0,0, 10" Foreground="Black" DropDownClosed="DropNotificationSound_Closed" SelectionChanged="cmbNotificationSound_SelectionChanged">
-                                    <ComboBoxItem Content="Default" IsSelected="True" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Calm" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Chord" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Chord2" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Cloud" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Glisten" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Jinja" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Jinja2" Foreground="Black"></ComboBoxItem>
-                                    <ComboBoxItem Content="Polite" Foreground="Black"></ComboBoxItem>
-                                </ComboBox>
-                                <CheckBox x:Name="chkEnableSound" 
-                                          Content="Enable sound notifications"
-                                          IsChecked="True"
-                                          Margin="0,0,0,10"
-                                          Foreground="{DynamicResource ForeColor}"/>
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- About Tab -->
-            <TabItem Header="About" 
-                     Background="Transparent"
-                     Foreground="{DynamicResource ForeColor}">
-                <StackPanel VerticalAlignment="Center" 
-                            HorizontalAlignment="Center"
-                            Margin="20">
-                    <TextBlock Text="Zen Pomo Timer" 
-                               FontSize="24" 
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource ForeColor}"
-                               HorizontalAlignment="Center"/>
-
-                    <TextBlock Text="Version 1.0.0" 
-                               FontSize="14"
-                               Foreground="#888888"
-                               Margin="0,5,0,20"
-                               HorizontalAlignment="Center"/>
+                <!-- Right: Window control buttons (same as main window) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="btnMinimize"
+                            Width="34" Height="34" Padding="4"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Minimize"
+                            Foreground="Gray" Click="btnMinimize_Click">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18"/>
+                    </Button>
+                    <Button x:Name="btnMaximize"
+                            Width="34" Height="34" Padding="4"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Maximize"
+                            Foreground="Gray" Click="btnMaximize_Click">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Width="18" Height="18"/>
+                    </Button>
+                    <Button x:Name="btnClose"
+                            Width="34" Height="34" Padding="4"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Close"
+                            Foreground="PaleVioletRed" Click="btnClose_Click">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                    </Button>
                 </StackPanel>
-            </TabItem>
-        </TabControl>
-        <StackPanel Grid.Row="1"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Margin="0,0,10,10">
-            <Button x:Name="btnCancel" Content="Cancel" 
-            Width="60" 
-            Margin="5,5,5,5"
-            Height="30"
-            Background="{DynamicResource PrimaryColor}"
-            Foreground="White" 
-            FontSize="14"
-            Cursor="Hand"
-            HorizontalAlignment="Left" Click="btnCancel_Click">
-            </Button>
-            <Button Content="Save"
-                    x:Name="btnSave"
-                    Margin="5,5,5,5"
-                    Height="30"
-                    Width="60"
-                    Background="{DynamicResource PrimaryColor}"
-                    Foreground="White"
-                    FontSize="14"
-                    Cursor="Hand" HorizontalAlignment="Left" Click="btnSave_Click">
-            </Button>
-        </StackPanel>
-    </Grid>
+            </Grid>
+
+            <!-- ========== MAIN TAB CONTROL ========== -->
+            <TabControl Grid.Row="1"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Margin="15,5,15,0"
+                        Padding="0"
+                        HorizontalContentAlignment ="Left">
+
+                <TabControl.Resources>
+                    <!-- Forces the row of tabs to stay on the left -->
+                    <Style TargetType="{x:Type TabPanel}">
+                        <Setter Property="HorizontalAlignment" Value="Left" />
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- General Tab -->
+                <TabItem Header="General">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+                        <StackPanel Margin="0,0,0,10">
+                            <GroupBox Header="Timer Duration">
+                                <StackPanel Margin="10">
+                                    <Label Content="Pomodoro (minutes):"/>
+                                    <TextBox x:Name="txtSessionTime" Margin="0,0,0,10"
+                                             PreviewTextInput="NumberOnly_PreviewTextInput"
+                                             DataObject.Pasting="TextBox_Pasting" 
+                                             TextChanged="txtSessionTime_TextChanged"/>
+
+                                    <Label Content="Short Break (minutes):"/>
+                                    <TextBox x:Name="txtShortBreak" Margin="0,0,0,10"
+                                             PreviewTextInput="NumberOnly_PreviewTextInput"
+                                             DataObject.Pasting="TextBox_Pasting" 
+                                             TextChanged="txtShortBreak_TextChanged"/>
+
+                                    <Label Content="Long Break (minutes):"/>
+                                    <TextBox x:Name="txtLongBreak" Margin="0,0,0,10"
+                                             PreviewTextInput="NumberOnly_PreviewTextInput"
+                                             DataObject.Pasting="TextBox_Pasting" 
+                                             TextChanged="txtLongBreak_TextChanged"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Pomodoro Count">
+                                <StackPanel Margin="10">
+                                    <Label Content="Pomodoros until long break:"/>
+                                    <TextBox x:Name="txtPomodoroBeforeLongBreak"
+                                             PreviewTextInput="NumberOnly_PreviewTextInput"
+                                             DataObject.Pasting="TextBox_Pasting" 
+                                             Foreground="{DynamicResource ForeColor}"
+                                             TextChanged="txtPomodoroBeforeLongBreak_TextChanged"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Behavior">
+                                <StackPanel Margin="10">
+                                    <CheckBox x:Name="chkAutoStartBreaks" Content="Auto-start breaks" Margin="0,0,0,5"/>
+                                    <CheckBox x:Name="chkAutoStartPomodoros" Content="Auto-start pomodoros"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Appearance Tab -->
+                <TabItem Header="Appearance">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+                        <StackPanel Margin="0,0,0,10">
+                            <GroupBox Header="Colors">
+                                <StackPanel Margin="10">
+                                    <Label Content="Primary Color:"/>
+                                    <ComboBox x:Name="cmbPrimaryColor" Margin="0,0,0,10" 
+                                              SelectionChanged="cmbPrimaryColor_SelectionChanged">
+                                        <ComboBoxItem Content="Purple" IsSelected="True"/>
+                                        <ComboBoxItem Content="Blue"/>
+                                        <ComboBoxItem Content="Green"/>
+                                        <ComboBoxItem Content="Red"/>
+                                        <ComboBoxItem Content="Orange"/>
+                                    </ComboBox>
+
+                                    <Label Content="Background Color:"/>
+                                    <ComboBox x:Name="cmbBackgroundColor" 
+                                              SelectionChanged="cmbBackgroundColor_SelectionChanged">
+                                        <ComboBoxItem Content="Dark" IsSelected="True"/>
+                                        <ComboBoxItem Content="Light"/>
+                                        <ComboBoxItem Content="System"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Sound Tab -->
+                <TabItem Header="Sound">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,5,0,0">
+                        <StackPanel Margin="0,0,0,10">
+                            <GroupBox Header="Notifications">
+                                <StackPanel Margin="10">
+                                    <Label Content="Notification Tone"/>
+                                    <ComboBox x:Name="cmbNotificationSound" Margin="0,0,0,10" 
+                                              DropDownClosed="DropNotificationSound_Closed" 
+                                              SelectionChanged="cmbNotificationSound_SelectionChanged">
+                                        <ComboBoxItem Content="Default" IsSelected="True"/>
+                                        <ComboBoxItem Content="Calm"/>
+                                        <ComboBoxItem Content="Chord"/>
+                                        <ComboBoxItem Content="Chord2"/>
+                                        <ComboBoxItem Content="Cloud"/>
+                                        <ComboBoxItem Content="Glisten"/>
+                                        <ComboBoxItem Content="Jinja"/>
+                                        <ComboBoxItem Content="Jinja2"/>
+                                        <ComboBoxItem Content="Polite"/>
+                                    </ComboBox>
+                                    <CheckBox x:Name="chkEnableSound" 
+                                              Content="Enable sound notifications"
+                                              IsChecked="True"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- About Tab -->
+                <TabItem Header="About">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                        <TextBlock Text="Zen Pomo Timer" 
+                                   FontSize="24" 
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource ForeColor}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Version 1.0.0" 
+                                   FontSize="14"
+                                   Foreground="{DynamicResource ForeColor}"
+                                   Opacity="0.6"
+                                   Margin="0,5,0,20"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+
+            <!-- ========== BOTTOM BUTTONS ========== -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,10,15,15">
+                <Button x:Name="btnCancel"
+                        Content="CANCEL"
+                        Width="83"
+                        Height="36"
+                        Margin="5"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        materialDesign:ButtonAssist.CornerRadius="12"
+                        FontWeight="Medium"
+                        Click="btnCancel_Click"/>
+                <Button x:Name="btnSave"
+                        Content="SAVE"
+                        Width="80"
+                        Height="36"
+                        Margin="5"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        materialDesign:ButtonAssist.CornerRadius="12"
+                        FontWeight="Medium"
+                        Background="{DynamicResource PrimaryColor}"
+                        Foreground="White"
+                        Click="btnSave_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>
