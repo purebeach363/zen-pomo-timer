@@ -91,7 +91,7 @@ namespace zen_pomo_timer
                 AutoStartBreaks = false,
                 AutoStartPomodoros = false,
                 EnableSound = true,
-                PrimaryColor = "Purple",
+                PrimaryColor = "#A7C080",
                 BackgroundTheme = "Dark"
             };
         }

@@ -7,13 +7,36 @@ using System.Windows.Input;
 using zen_pomo_timer.Views;
 using zen_pomo_timer.Models.Data;
 using zen_pomo_timer.Models;
-using zen_pomo_timer.Views;
+using ToastNotifications;
+using ToastNotifications.Lifetime;
+using ToastNotifications.Position;
+using ToastNotifications.Messages;
 
 namespace zen_pomo_timer
 {
     public partial class MainWindow : Window
     {
+        private Notifier _notifier;
+        private void InitNotifier()
+        {
+            _notifier = new Notifier(cfg =>
+            {
+                cfg.PositionProvider = new PrimaryScreenPositionProvider(
+                    corner: ToastNotifications.Position.Corner.BottomRight,  // Change to BottomLeft
+                    offsetX: 10,
+                    offsetY: 10);
 
+                cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
+                    notificationLifetime: TimeSpan.FromSeconds(5),
+                    maximumNotificationCount: MaximumNotificationCount.FromCount(3));
+
+                cfg.Dispatcher = Application.Current.Dispatcher;
+
+                // Extra: Make top-most and set width
+                cfg.DisplayOptions.TopMost = true;
+                cfg.DisplayOptions.Width = 350;
+            });
+        }
         #region declaration
 
         public TimerSettings settings;
@@ -35,6 +58,7 @@ namespace zen_pomo_timer
         public MainWindow()
         {
             InitializeComponent();
+            InitNotifier();
 
             using (var db = new AppDbContext())
             {
@@ -172,7 +196,9 @@ namespace zen_pomo_timer
 
         private void HandleTimerExpired()
         {
-            if(timerMode == TimerMode.Pomodoro)
+            string content = "Time is up!";
+            _notifier.ShowInformation(content);
+            if (timerMode == TimerMode.Pomodoro)
             {
                 SavePomodoroSession();
             }
@@ -297,15 +323,45 @@ namespace zen_pomo_timer
         private void SyncGlobalResourcesToSettings()
         {
             var conv = ColorConverter.ConvertFromString;
+            // This is the color the user chose (e.g., Sage #A7C080)
+            var primaryColor = (Color)conv(settings.PrimaryColor);
+            var primaryBrush = new SolidColorBrush(primaryColor);
+
+            // 1. Update your custom key used in XAML
+            Application.Current.Resources["PrimaryColor"] = primaryBrush;
+
+            // 2. Overwrite Material Design's internal "Purple" keys
+            // This effectively "kills" the purple everywhere in the app
+            Application.Current.Resources["PrimaryHueMidBrush"] = primaryBrush;
+            Application.Current.Resources["PrimaryHueLightBrush"] = primaryBrush;
+            Application.Current.Resources["PrimaryHueDarkBrush"] = primaryBrush;
+
+            // This specifically handles the "Ripple" effect and button mouse-over
+            Application.Current.Resources["SecondaryAccentBrush"] = primaryBrush;
+            Application.Current.Resources["MaterialDesignSelection"] = primaryBrush;
+
+            // 3. Handle Dark/Light Mode Backgrounds
             if (settings.BackgroundTheme == "Dark")
             {
-                Application.Current.Resources["ForeColor"] = Brushes.White;
-                Application.Current.Resources["MaterialDesignPaper"] = new SolidColorBrush((Color)conv("#333333"));
+                // ZEN DARK - High Contrast
+                var darkBg = new SolidColorBrush((Color)conv("#1E2326")); // Keep the deep charcoal
+                var whiteText = new SolidColorBrush(Colors.White); // Pure White
+
+                Application.Current.Resources["ForeColor"] = whiteText;
+                Application.Current.Resources["MaterialDesignPaper"] = darkBg;
+                Application.Current.Resources["MaterialDesignBody"] = whiteText;
             }
             else
             {
-                Application.Current.Resources["ForeColor"] = new SolidColorBrush((Color)conv("#333333"));
-                Application.Current.Resources["MaterialDesignPaper"] = new SolidColorBrush((Color)conv("#F5F5F5"));
+                var lightBg = new SolidColorBrush((Color)conv("#FCFDFF"));
+                var textBrush = new SolidColorBrush((Color)conv("#2D3436"));
+
+                Application.Current.Resources["ForeColor"] = textBrush;
+                Application.Current.Resources["MaterialDesignPaper"] = lightBg;
+                Application.Current.Resources["MaterialDesignBody"] = textBrush;
+
+                // This adds a very subtle divider line color for light mode
+                Application.Current.Resources["MaterialDesignDivider"] = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
             }
         }
 
@@ -472,7 +528,10 @@ namespace zen_pomo_timer
                     _isLocked = true;
                 }
             }
-
+        }
+        private void UpdateResource(string key, object value)
+        {
+            Application.Current.Resources[key] = value;
         }
     }
 

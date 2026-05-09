@@ -27,7 +27,14 @@ namespace zen_pomo_timer
             { "Jinja2", "Jinja2.wav" },
             { "Polite", "Polite.wav" }
         };
-
+        private Dictionary<string, string> _zenColorMap = new Dictionary<string, string>
+        {
+            { "Sage", "#A7C080" },      // Soft Green
+            { "Sky", "#7AA2F7" },       // Deep Sky Blue
+            { "Rose", "#D699B6" },      // Muted Pink/Rose
+            { "Slate", "#4C566A" },     // Cool Grey-Blue
+            { "Terracotta", "#E67E80" } // Earthy Red
+        };
         public SettingsWindow(TimerSettings settings)
         {
             currentSettings = settings;
@@ -139,53 +146,46 @@ namespace zen_pomo_timer
         private void LoadSettings()
         {
             var converter = new BrushConverter();
-            var brush = (SolidColorBrush)converter.ConvertFromString(currentSettings.PrimaryColor);
 
-            Application.Current.Resources["PrimaryColor"] = brush;
+            // 1. Set the local preview color for the Settings window
+            if (converter.ConvertFromString(currentSettings.PrimaryColor) is Color color)
+            {
+                this.Resources["PrimaryColor"] = new SolidColorBrush(color);
+            }
 
-
+            // 2. Load Numeric and Boolean settings
             txtSessionTime.Text = ((int)currentSettings.SessionTime.TotalMinutes).ToString();
             txtShortBreak.Text = ((int)currentSettings.BreakTime.TotalMinutes).ToString();
             txtLongBreak.Text = ((int)currentSettings.LongBreakTime.TotalMinutes).ToString();
             txtPomodoroBeforeLongBreak.Text = currentSettings.PomodorosBeforeLongBreak.ToString();
-
-            // Load new settings
             chkAutoStartBreaks.IsChecked = currentSettings.AutoStartBreaks;
             chkAutoStartPomodoros.IsChecked = currentSettings.AutoStartPomodoros;
             chkEnableSound.IsChecked = currentSettings.EnableSound;
 
-            // Set the sound selection
-            // Find display name based on the saved file name
-            string displayName = "Default";
-            foreach (var mapping in _soundFileMap)
-            {
-                if (mapping.Value == currentSettings.NotificationSound)
-                {
-                    displayName = mapping.Key;
-                    break;
-                }
-            }
-
-            // Select the correct item in the combo box
+            // 3. Set Sound Selection (Existing logic is solid)
+            string soundDisplay = _soundFileMap.FirstOrDefault(x => x.Value == currentSettings.NotificationSound).Key ?? "Default";
             foreach (ComboBoxItem item in cmbNotificationSound.Items)
             {
-                if (item.Content.ToString() == displayName)
+                if (item.Content.ToString() == soundDisplay)
                 {
                     cmbNotificationSound.SelectedItem = item;
                     break;
                 }
             }
 
-            // Set combo boxes for appearance
+            // 4. FIXED: Set Primary Color Selection
+            // We look up the Display Name (e.g., "Sage") using the stored Hex Code
+            string colorDisplay = _zenColorMap.FirstOrDefault(x => x.Value == currentSettings.PrimaryColor).Key ?? "Sage";
             foreach (ComboBoxItem item in cmbPrimaryColor.Items)
             {
-                if (item.Content.ToString() == currentSettings.PrimaryColor)
+                if (item.Content.ToString() == colorDisplay)
                 {
                     cmbPrimaryColor.SelectedItem = item;
                     break;
                 }
             }
 
+            // 5. Set Background Theme Selection
             foreach (ComboBoxItem item in cmbBackgroundColor.Items)
             {
                 if (item.Content.ToString() == currentSettings.BackgroundTheme)
@@ -210,30 +210,36 @@ namespace zen_pomo_timer
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            // 1. Save Basic Behaviors
             currentSettings.AutoStartBreaks = chkAutoStartBreaks.IsChecked ?? false;
             currentSettings.AutoStartPomodoros = chkAutoStartPomodoros.IsChecked ?? false;
             currentSettings.EnableSound = chkEnableSound.IsChecked ?? true;
 
-            // Save sound selection - FIX: Don't add .wav twice
+            // 2. Save Sound Selection
             if (cmbNotificationSound.SelectedItem is ComboBoxItem soundItem)
             {
                 string displayName = soundItem.Content.ToString();
-                // Map display name to actual filename
-                if (_soundFileMap.ContainsKey(displayName))
+                currentSettings.NotificationSound = _soundFileMap.ContainsKey(displayName)
+                    ? _soundFileMap[displayName]
+                    : "notification.wav";
+            }
+
+            // 3. FIXED: Save Primary Color as Hex
+            if (cmbPrimaryColor.SelectedItem is ComboBoxItem primaryItem)
+            {
+                string displayName = primaryItem.Content.ToString();
+                // Store the Hex value from the map, not the name "Sage"
+                if (_zenColorMap.TryGetValue(displayName, out string hexCode))
                 {
-                    currentSettings.NotificationSound = _soundFileMap[displayName]; // Already includes .wav
-                }
-                else
-                {
-                    currentSettings.NotificationSound = "notification.wav"; // Default
+                    currentSettings.PrimaryColor = hexCode;
                 }
             }
 
-            if (cmbPrimaryColor.SelectedItem is ComboBoxItem primaryItem)
-                currentSettings.PrimaryColor = primaryItem.Content.ToString();
-
+            // 4. Save Background Theme
             if (cmbBackgroundColor.SelectedItem is ComboBoxItem bgItem)
+            {
                 currentSettings.BackgroundTheme = bgItem.Content.ToString();
+            }
 
             this.DialogResult = true;
             this.Close();
@@ -249,10 +255,17 @@ namespace zen_pomo_timer
             {
                 string colorName = item.Content.ToString();
 
-                var brush = (SolidColorBrush)new BrushConverter()
-                    .ConvertFromString(colorName);
+                // Map the display name to the Zen hex code
+                if (_zenColorMap.TryGetValue(colorName, out string hexCode))
+                {
+                    var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(hexCode);
 
-                this.Resources["PrimaryColor"] = brush; // 🔥 use THIS, not Application
+                    // Update the local window preview
+                    this.Resources["PrimaryColor"] = brush;
+
+                    // Note: We don't save to currentSettings here yet, 
+                    // that happens in btnSave_Click.
+                }
             }
         }
 

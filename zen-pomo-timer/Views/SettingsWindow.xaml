@@ -249,11 +249,11 @@
                                     <Label Content="Primary Color:"/>
                                     <ComboBox x:Name="cmbPrimaryColor" Margin="0,0,0,10" 
                                               SelectionChanged="cmbPrimaryColor_SelectionChanged">
-                                        <ComboBoxItem Content="Purple" IsSelected="True"/>
-                                        <ComboBoxItem Content="Blue"/>
-                                        <ComboBoxItem Content="Green"/>
-                                        <ComboBoxItem Content="Red"/>
-                                        <ComboBoxItem Content="Orange"/>
+                                        <ComboBoxItem Content="Sage" IsSelected="True"/>
+                                        <ComboBoxItem Content="Sky"/>
+                                        <ComboBoxItem Content="Rose"/>
+                                        <ComboBoxItem Content="Slate"/>
+                                        <ComboBoxItem Content="Terracotta"/>
                                     </ComboBox>
 
                                     <Label Content="Background Color:"/>

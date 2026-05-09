@@ -18,6 +18,24 @@
         ResizeMode="NoResize"
         PreviewKeyDown="Window_PreviewKeyDown">
 
+    <Window.Resources>
+        <Style TargetType="Control">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
+        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource PrimaryColor}"/>
+        </Style>
+
+        <Style x:Key="ZenOutlinedButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
+        </Style>
+    </Window.Resources>
+
     <Border Background="{DynamicResource MaterialDesignPaper}"
             CornerRadius="20"
             ClipToBounds="True"
@@ -123,23 +141,19 @@
 
             <!-- Action Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="btnStartStop"
-                        Content="Start"
-                        Width="90"
-                        Height="45"
-                        materialDesign:ButtonAssist.CornerRadius="12"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        Margin="5"
-                        Click="btnStartStop_Click"/>
-
-                <Button x:Name="btnSkip"
-                        Content="Skip"
-                        Width="90"
-                        Height="45"
-                        materialDesign:ButtonAssist.CornerRadius="12"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="5"
-                        Click="btnSkip_Click"/>
+                    <Button x:Name="btnStartStop"
+                    Content="Start"
+                    Width="90" Height="45"
+                    materialDesign:ButtonAssist.CornerRadius="12"
+                    Margin="5"
+                    Click="btnStartStop_Click"/>
+                    <Button x:Name="btnSkip"
+                    Content="Skip"
+                    Width="90" Height="45"
+                    materialDesign:ButtonAssist.CornerRadius="12"
+                    Style="{StaticResource ZenOutlinedButton}" 
+                    Margin="5"
+                    Click="btnSkip_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
