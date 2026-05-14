@@ -323,29 +323,24 @@ namespace zen_pomo_timer
         private void SyncGlobalResourcesToSettings()
         {
             var conv = ColorConverter.ConvertFromString;
-            // This is the color the user chose (e.g., Sage #A7C080)
             var primaryColor = (Color)conv(settings.PrimaryColor);
             var primaryBrush = new SolidColorBrush(primaryColor);
 
-            // 1. Update your custom key used in XAML
+            // 1. Update Custom & Core MD Brushes
             Application.Current.Resources["PrimaryColor"] = primaryBrush;
-
-            // 2. Overwrite Material Design's internal "Purple" keys
-            // This effectively "kills" the purple everywhere in the app
             Application.Current.Resources["PrimaryHueMidBrush"] = primaryBrush;
             Application.Current.Resources["PrimaryHueLightBrush"] = primaryBrush;
             Application.Current.Resources["PrimaryHueDarkBrush"] = primaryBrush;
-
-            // This specifically handles the "Ripple" effect and button mouse-over
+            Application.Current.Resources["SecondaryHueMidBrush"] = primaryBrush;
             Application.Current.Resources["SecondaryAccentBrush"] = primaryBrush;
             Application.Current.Resources["MaterialDesignSelection"] = primaryBrush;
 
-            // 3. Handle Dark/Light Mode Backgrounds
+            // 2. Handle Dark/Light Mode Backgrounds
             if (settings.BackgroundTheme == "Dark")
             {
-                // ZEN DARK - High Contrast
-                var darkBg = new SolidColorBrush((Color)conv("#1E2326")); // Keep the deep charcoal
-                var whiteText = new SolidColorBrush(Colors.White); // Pure White
+                // Aligned with SettingsWindow preview (#2D3436)
+                var darkBg = new SolidColorBrush((Color)conv("#2D3436"));
+                var whiteText = new SolidColorBrush(Colors.White);
 
                 Application.Current.Resources["ForeColor"] = whiteText;
                 Application.Current.Resources["MaterialDesignPaper"] = darkBg;
@@ -359,8 +354,6 @@ namespace zen_pomo_timer
                 Application.Current.Resources["ForeColor"] = textBrush;
                 Application.Current.Resources["MaterialDesignPaper"] = lightBg;
                 Application.Current.Resources["MaterialDesignBody"] = textBrush;
-
-                // This adds a very subtle divider line color for light mode
                 Application.Current.Resources["MaterialDesignDivider"] = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
             }
         }

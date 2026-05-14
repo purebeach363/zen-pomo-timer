@@ -150,7 +150,9 @@ namespace zen_pomo_timer
             // 1. Set the local preview color for the Settings window
             if (converter.ConvertFromString(currentSettings.PrimaryColor) is Color color)
             {
-                this.Resources["PrimaryColor"] = new SolidColorBrush(color);
+                var brush = new SolidColorBrush(color);
+                this.Resources["PrimaryColor"] = brush;
+                UpdateMaterialDesignBrushes(brush); // Sync MD on load
             }
 
             // 2. Load Numeric and Boolean settings
@@ -194,6 +196,7 @@ namespace zen_pomo_timer
                     break;
                 }
             }
+
         }
 
         private void DropNotificationSound_Closed(object sender, EventArgs e)
@@ -255,18 +258,31 @@ namespace zen_pomo_timer
             {
                 string colorName = item.Content.ToString();
 
-                // Map the display name to the Zen hex code
                 if (_zenColorMap.TryGetValue(colorName, out string hexCode))
                 {
                     var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(hexCode);
 
-                    // Update the local window preview
+                    // 1. Update your local key for the Save button and Tabs
                     this.Resources["PrimaryColor"] = brush;
 
-                    // Note: We don't save to currentSettings here yet, 
-                    // that happens in btnSave_Click.
+                    // 2. Update Global Material Design keys to kill the purple
+                    UpdateMaterialDesignBrushes(brush);
                 }
             }
+        }
+        private void UpdateMaterialDesignBrushes(SolidColorBrush brush)
+        {
+            // Fixes the Cancel button and focused text boxes
+            UpdateGlobalResource("PrimaryHueMidBrush", brush);
+            UpdateGlobalResource("PrimaryHueLightBrush", brush);
+            UpdateGlobalResource("PrimaryHueDarkBrush", brush);
+
+            // Fixes CheckBox checkmarks and ripples
+            UpdateGlobalResource("SecondaryHueMidBrush", brush);
+            UpdateGlobalResource("SecondaryAccentBrush", brush);
+
+            // Fixes the selection highlight in ComboBoxes
+            UpdateGlobalResource("MaterialDesignSelection", brush);
         }
 
         private void cmbBackgroundColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -278,15 +294,18 @@ namespace zen_pomo_timer
 
                 if (selected == "Dark")
                 {
-                    var darkBg = new SolidColorBrush((Color)conv("#333333"));
+                    // Consistent "Zen Dark" color
+                    var darkBg = new SolidColorBrush((Color)conv("#2D3436"));
                     UpdateGlobalResource("ForeColor", Brushes.White);
-                    UpdateGlobalResource("MaterialDesignPaper", darkBg); // This fixes the Main Window Border
+                    UpdateGlobalResource("MaterialDesignPaper", darkBg);
+                    UpdateGlobalResource("MaterialDesignBody", Brushes.White);
                 }
                 else if (selected == "Light")
                 {
                     var lightBg = new SolidColorBrush((Color)conv("#F5F5F5"));
                     UpdateGlobalResource("ForeColor", new SolidColorBrush((Color)conv("#333333")));
-                    UpdateGlobalResource("MaterialDesignPaper", lightBg); // This fixes the Main Window Border
+                    UpdateGlobalResource("MaterialDesignPaper", lightBg);
+                    UpdateGlobalResource("MaterialDesignBody", new SolidColorBrush((Color)conv("#333333")));
                 }
             }
         }

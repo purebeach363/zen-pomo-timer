@@ -19,7 +19,7 @@
 
     <Window.Resources>
         <!-- Dynamic primary colour – updated by colour picker -->
-        <SolidColorBrush x:Key="PrimaryColor" Color="Purple"/>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#A7C080"/>
 
         <!-- Keep ForeColor for text (set globally by background theme) -->
         <!-- No longer define BackgroundColorPanel / BorderColorPanel -->
@@ -73,7 +73,7 @@
             <Setter Property="FontSize" Value="13"/>
             <Style.Triggers>
                 <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ForeColor}"/>
                     <Setter Property="BorderThickness" Value="2"/>
                 </Trigger>
             </Style.Triggers>
@@ -86,6 +86,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
             <Setter Property="Padding" Value="8,5"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush" Value="{DynamicResource PrimaryColor}"/>
+            <Setter Property="materialDesign:ComboBoxAssist.ShowSelectedItem" Value="True"/>
         </Style>
 
         <!-- CheckBox keeps its Material Design base -->
@@ -93,6 +95,7 @@
             <Setter Property="Foreground" Value="{DynamicResource ForeColor}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryColor}"/>
         </Style>
 
         <!-- GroupBox styled to match the main window -->
